@@ -11,18 +11,232 @@
 (function(){var t="light";try{var s=localStorage.getItem("mcpDict.theme");t=s==="dark"?"dark":s==="light"?"light":(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light")}catch(e){}document.documentElement.dataset.theme=t})();
 </script>
 <style>
-/* styles loaded - full CSS in app build */
 :root{--bg:#F7F8FA;--panel:#fff;--hover:#F0F2F5;--line:#E7E9EE;--line2:#D8DBE2;--tx:#0F1218;--mut:#6A7280;--faint:#A0A6B2;--ink:#0F1218;--onInk:#fff;--acc:#2D4BDB;--accBg:rgba(45,75,219,.14);--red:#D23B3B;--shadow:0 1px 2px rgba(15,18,24,.04),0 8px 24px rgba(15,18,24,.05);--rail:64px;color-scheme:light}
 [data-theme=dark]{--bg:#0A0B0D;--panel:#111215;--hover:#181A1E;--line:#212328;--line2:#2E3138;--tx:#EDEEF0;--mut:#8C919B;--faint:#5C616B;--ink:#EDEEF0;--onInk:#0A0B0D;--acc:#93A6FF;--accBg:rgba(147,166,255,.24);--red:#F26B6B;--shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);color-scheme:dark}
-*{box-sizing:border-box}body{margin:0;min-height:100vh;background:var(--bg);color:var(--tx);font-family:"IBM Plex Sans Thai","Segoe UI",sans-serif}
+*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
+body{margin:0;min-height:100vh;background:var(--bg);color:var(--tx);font-family:"IBM Plex Sans Thai","Segoe UI","Noto Sans Thai",Tahoma,sans-serif;font-weight:400;-webkit-font-smoothing:antialiased;transition:background .25s,color .25s}
+button,input,select,textarea{font:inherit;color:inherit}button{cursor:pointer}[hidden]{display:none!important}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.rail{position:fixed;top:0;right:0;bottom:0;width:var(--rail);z-index:5;display:flex;flex-direction:column;align-items:center;gap:4px;padding:16px 0;background:var(--bg);border-left:1px solid var(--line)}
+.rail .sp{flex:1}.rail .sep{width:24px;height:1px;background:var(--line);margin:6px 0}
+.rb{position:relative;width:42px;height:42px;display:grid;place-items:center;border:0;border-radius:12px;background:none;color:var(--mut);padding:0;transition:background .15s,color .15s}
+.rb:hover,.rb.on{background:var(--hover);color:var(--tx)}
+.rb svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.rb::after,.lang::after{content:attr(data-tip);position:absolute;right:calc(100% + 12px);top:50%;transform:translate(4px,-50%);background:var(--ink);color:var(--onInk);font-size:12px;font-weight:500;padding:8px 10px;border-radius:8px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .15s,transform .15s}
+.rb:hover::after,.lang:hover::after{opacity:1;transform:translate(0,-50%)}
+.i-sun{display:none}[data-theme=dark] .i-sun{display:block}[data-theme=dark] .i-moon{display:none}
+main{max-width:820px;margin:0 auto;padding:0 28px 80px;margin-right:max(var(--rail),calc((100vw - 820px - var(--rail))/2 + var(--rail)))}
+.hero{text-align:center;padding:22vh 0 24px;transition:padding .25s}.hero.compact{padding:44px 0 8px}
+.logo{display:inline-block;font-size:clamp(30px,5.5vw,44px);font-weight:600;letter-spacing:-.035em;line-height:1.1;cursor:pointer;margin:0}
+.count{color:var(--mut);font-size:14px;margin:10px 0 28px}.hero.compact .count{display:none}.hero.compact .logo{font-size:22px;margin-bottom:20px}
+.sbox{position:relative;max-width:640px;margin:0 auto}
+.sbox>svg{position:absolute;left:20px;top:50%;transform:translateY(-50%);width:18px;height:18px;fill:none;stroke:var(--faint);stroke-width:1.8;stroke-linecap:round;pointer-events:none}
+.sbox input{width:100%;height:56px;padding:0 56px 0 52px;font-size:16px;background:var(--panel);border:1px solid var(--line2);border-radius:16px;box-shadow:var(--shadow);transition:border-color .15s,box-shadow .15s}
+.sbox input::placeholder{color:var(--faint)}.sbox input:focus{outline:none;border-color:var(--tx);box-shadow:0 0 0 4px var(--accBg)}
+.clr{position:absolute;right:12px;top:50%;transform:translateY(-50%);width:32px;height:32px;border:0;border-radius:8px;background:none;color:var(--mut);display:grid;place-items:center;padding:0}
+.clr:hover{background:var(--hover);color:var(--tx)}.clr svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round}
+.cats{display:flex;gap:8px;overflow-x:auto;padding:20px 0 6px;scrollbar-width:none}.cats::-webkit-scrollbar{display:none}
+.chip{flex:none;height:32px;padding:0 14px;border-radius:999px;border:1px solid var(--line2);background:transparent;color:var(--mut);font-size:13px;white-space:nowrap}.chip:hover{color:var(--tx)}.chip.on{background:var(--ink);border-color:var(--ink);color:var(--onInk)}
+.meta{color:var(--mut);font-size:13px;margin:18px 2px 12px}
+.list{background:var(--panel);border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:var(--shadow)}
+.item{display:grid;grid-template-columns:112px 1fr auto;gap:20px;align-items:start;padding:20px 22px;border-top:1px solid var(--line);cursor:pointer}.item:first-child{border-top:0}.item:hover{background:var(--hover)}
+.abbr{font-size:20px;font-weight:600;letter-spacing:-.015em;line-height:1.3;overflow-wrap:anywhere}
+.full{font-size:15px;font-weight:500;line-height:1.4}.th{font-size:14px;color:var(--tx);margin-top:3px;opacity:.82}
+.desc{font-size:13.5px;color:var(--mut);line-height:1.7;margin-top:8px}.desc:empty{display:none}
+.tag{display:inline-block;margin-top:12px;font-size:12px;color:var(--mut);background:var(--hover);padding:3px 10px;border-radius:999px;border:1px solid var(--line)}
+.ia{display:flex;gap:2px;opacity:0;transition:opacity .15s}.item:hover .ia{opacity:1}@media(hover:none){.ia{opacity:1}}
+.ib{width:32px;height:32px;border:0;border-radius:8px;background:none;color:var(--mut);display:grid;place-items:center;padding:0}.ib:hover{background:var(--line);color:var(--tx)}.ib.dng:hover{color:var(--red)}
+.ib svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.empty{text-align:center;color:var(--mut);padding:56px 20px}.empty p{margin:0 0 18px}
+mark{background:var(--accBg);color:inherit;border-radius:3px;padding:0 1px}
+.btn{height:38px;padding:0 16px;border-radius:10px;border:1px solid var(--line2);background:var(--panel);font-size:14px;font-weight:500}.btn:hover{background:var(--hover)}
+.btn.pri{background:var(--ink);border-color:var(--ink);color:var(--onInk)}.btn.pri:hover{opacity:.88}
+.btn.sm{height:30px;padding:0 12px;font-size:13px;border-radius:8px}
+.ov{position:fixed;inset:0;z-index:10;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(8,9,11,.5);backdrop-filter:blur(6px)}.ov.show{display:flex}
+.modal{width:100%;max-width:520px;max-height:92vh;overflow:auto;padding:28px;background:var(--panel);border:1px solid var(--line);border-radius:20px;box-shadow:0 24px 64px rgba(0,0,0,.28)}
+.modal.wide{max-width:560px}.modal h2{margin:0 0 6px;font-size:18px;font-weight:600}
+label{display:block;font-size:12.5px;font-weight:500;color:var(--mut);margin:16px 0 6px}
+.modal input,.modal select,.modal textarea{width:100%;padding:11px 12px;font-size:14.5px;background:var(--bg);border:1px solid var(--line2);border-radius:10px}
+.modal input:focus,.modal select:focus,.modal textarea:focus{outline:none;border-color:var(--tx);box-shadow:0 0 0 4px var(--accBg)}
+.modal textarea{resize:vertical}.row{display:flex;gap:8px;justify-content:flex-end;margin-top:26px}.row.sb{justify-content:space-between}
+.vh{font-size:34px;font-weight:600;letter-spacing:-.03em;margin:0 0 8px;line-height:1.2}
+.dl{margin:12px 0 0}.dl div{padding:14px 0;border-top:1px solid var(--line)}.dl dt{font-size:12.5px;color:var(--mut);font-weight:500}.dl dd{margin:4px 0 0;line-height:1.6;font-size:15px}
+#toast{position:fixed;bottom:28px;left:calc(50% - var(--rail)/2);transform:translate(-50%,16px);background:var(--ink);color:var(--onInk);font-size:14px;font-weight:500;padding:11px 20px;border-radius:12px;opacity:0;transition:.25s;pointer-events:none;z-index:20;box-shadow:var(--shadow);max-width:calc(100vw - 100px)}
+#toast.show{opacity:1;transform:translate(-50%,0)}#toast.err{background:var(--red);color:#fff}
+.bd{position:absolute;top:3px;right:2px;min-width:16px;height:16px;padding:0 4px;border-radius:8px;background:var(--ink);color:var(--onInk);font-size:10px;font-weight:600;display:grid;place-items:center;pointer-events:none}
+.lang{position:relative;width:42px;border:1px solid var(--line2);border-radius:11px;background:none;padding:2px;display:flex;flex-direction:column;gap:2px;margin:0 0 8px}
+.lang span{height:22px;display:grid;place-items:center;font-size:11px;font-weight:600;color:var(--mut);border-radius:8px}.lang span.on{background:var(--ink);color:var(--onInk)}
+.lrow{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--line)}.lrow:first-child{border-top:0}.lrow.go{cursor:pointer}.lrow.go:hover .lt{color:var(--acc)}
+.lt{flex:1;min-width:0;font-size:14.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.lt b{font-weight:600;margin-right:8px}.lt span{color:var(--mut)}
+.lr{display:flex;gap:4px;align-items:center}.lst{margin-top:10px;max-height:52vh;overflow:auto}.none{text-align:center;color:var(--mut);padding:34px 0;font-size:14px}
+.ferr{color:var(--red);font-size:12.5px;margin:5px 2px 0}.modal .invalid{border-color:var(--red)!important}
 .sync{position:fixed;top:12px;left:12px;font-size:11px;color:var(--mut);z-index:6;display:flex;align-items:center;gap:6px}
 .sync .dot{width:8px;height:8px;border-radius:50%;background:#22c55e}.sync.off .dot{background:var(--red)}
+.sh{font-size:13px;font-weight:600;margin:24px 0 4px}.btns{display:flex;gap:8px;flex-wrap:wrap}
+.drop{border:1.5px dashed var(--line2);border-radius:14px;padding:26px 16px;text-align:center;color:var(--mut);font-size:14px;cursor:pointer}.drop:hover,.drop.over{border-color:var(--tx);color:var(--tx);background:var(--hover)}
+@media(max-width:720px){
+  .rb::after,.lang::after{display:none}
+  main{margin:0 auto;padding:0 18px calc(96px + env(safe-area-inset-bottom))}
+  .rail{top:auto;left:0;width:auto;height:calc(64px + env(safe-area-inset-bottom));flex-direction:row;justify-content:space-around;padding:0 12px env(safe-area-inset-bottom);border-left:0;border-top:1px solid var(--line)}
+  .rail .sp,.rail .sep{display:none}.lang{flex-direction:row;width:auto;margin:0}.lang span{width:30px}
+  .hero{padding-top:14vh}.item{grid-template-columns:1fr auto;gap:6px 12px;padding:18px}
+  .abbr{grid-column:1}.ia{grid-column:2;grid-row:1}.item>div:nth-child(2){grid-column:1/-1}
+  #toast{left:50%;bottom:calc(80px + env(safe-area-inset-bottom))}
+}
 </style>
-<link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <div class="sync off" id="syncStatus"><span class="dot"></span><span id="syncText">Connecting…</span></div>
-<div id="app-root">Loading…</div>
-<script src="app.js"></script>
+<nav class="rail" aria-label="Actions">
+  <button class="rb on" id="bAdd" data-ti="tipAdd"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+  <button class="rb" id="bBrowse" data-ti="tipBrowse"><svg viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg></button>
+  <span class="sep"></span>
+  <button class="rb" id="bHist" data-ti="tipHist"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg></button>
+  <button class="rb" id="bTrash" data-ti="tipTrash"><svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-12M9 7V4h6v3"/></svg><span class="bd" id="trashBd" hidden></span></button>
+  <span class="sep"></span>
+  <button class="rb" id="bBackup" data-ti="tipBackup"><svg viewBox="0 0 24 24"><path d="M7 4v13M3.5 13.5 7 17l3.5-3.5M17 20V7M13.5 10.5 17 7l3.5 3.5"/></svg></button>
+  <span class="sp"></span>
+  <button class="lang" id="bLang" data-ti="tipLang"><span data-l="en">EN</span><span data-l="th">TH</span></button>
+  <button class="rb" id="bTheme">
+    <svg class="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>
+    <svg class="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6 7 7M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4"/></svg>
+  </button>
+</nav>
+<main>
+  <div class="hero compact" id="hero">
+    <h1 class="logo" id="logo">MCP Dictionary</h1>
+    <div class="count" id="count"></div>
+    <div class="sbox">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="q" type="search" data-ph="searchPh" autocomplete="off">
+      <button class="clr" id="bClr" hidden><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    </div>
+  </div>
+  <div class="cats" id="cats" hidden></div>
+  <div class="meta" id="meta" hidden></div>
+  <div class="list" id="list" hidden></div>
+</main>
+<div class="ov" id="ovForm"><div class="modal">
+  <h2 id="fTitle"></h2>
+  <label data-i="lAbbr" data-req="1"></label><input id="fAbbr" maxlength="30">
+  <label data-i="lFull" data-req="1"></label><input id="fFull">
+  <label data-i="lThai" data-req="1"></label><input id="fTh">
+  <label data-i="lDesc"></label><textarea id="fDesc" rows="3"></textarea>
+  <label data-i="lCat" data-req="1"></label><select id="fCat"></select>
+  <label data-i="lEx"></label><input id="fEx">
+  <div class="row"><button class="btn" id="fCancel" data-i="cancel"></button><button class="btn pri" id="fSave" data-i="save"></button></div>
+</div></div>
+<div class="ov" id="ovView"><div class="modal">
+  <div id="vBody"></div>
+  <div class="row"><button class="btn" id="vCopy" data-i="copy"></button><button class="btn pri" id="vClose" data-i="close"></button></div>
+</div></div>
+<div class="ov" id="ovHist"><div class="modal wide">
+  <h2 data-i="histTitle"></h2>
+  <div class="lst" id="histList"></div>
+  <div class="row sb"><button class="btn" id="hClear" data-i="clearAll"></button><button class="btn pri" id="hClose" data-i="close"></button></div>
+</div></div>
+<div class="ov" id="ovTrash"><div class="modal wide">
+  <h2 data-i="trashTitle"></h2>
+  <p data-i="trashNote" style="color:var(--mut);font-size:14px"></p>
+  <div class="lst" id="trashList"></div>
+  <div class="row sb"><button class="btn" id="tEmpty" data-i="emptyTrash"></button><button class="btn pri" id="tClose" data-i="close"></button></div>
+</div></div>
+<div class="ov" id="ovBackup"><div class="modal wide">
+  <h2 data-i="bkTitle"></h2>
+  <div class="sh" data-i="exportH"></div>
+  <div class="btns"><button class="btn" id="exXlsx">Excel (.xlsx)</button></div>
+  <div class="sh" data-i="importH"></div>
+  <div class="drop" id="drop" tabindex="0" role="button" data-i="drop"></div>
+  <input type="file" id="file" accept=".xlsx,.xls,.xlsm" hidden>
+  <div class="row"><button class="btn pri" id="bkClose" data-i="close"></button></div>
+</div></div>
+<div id="toast" role="status"></div>
+<script>
+const SUPABASE_URL="https://qpmpzxmswwrsikggcdot.supabase.co";
+const SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFwbXB6eG1zd3dyc2lrZ2djZG90Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ1NTY0OTIsImV4cCI6MjExMDEzMjQ5Mn0.OKaDoyFTNH0hT-IYgsvhVEaOZk-Y1bJZrye7VgEtfIE";
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const CATS=["Engineering","Procument","Production","Production control","Quality assurance","Safty and health","Other"];
+const SEED=[["T0001","PO","Purchase Order","ใบสั่งซื้อ","เอกสารที่ผู้ซื้อออกให้ผู้ขายเพื่อยืนยันการสั่งซื้อสินค้าและบริการ","Procument",""],["T0002","PR","Purchase Requisition","ใบขอซื้อ","เอกสารที่หน่วยงานภายในใช้ขอให้ฝ่ายจัดซื้อดำเนินการจัดหาสินค้าหรือบริการ","Procument",""],["T0003","QA","Quality Assurance","การประกันคุณภาพ","กระบวนการวางระบบและมาตรการเพื่อป้องกันข้อผิดพลาดด้านคุณภาพ","Quality assurance",""],["T0004","QC","Quality Control","การควบคุมคุณภาพ","กระบวนการตรวจสอบและควบคุมผลิตภัณฑ์ให้เป็นไปตามข้อกำหนด","Quality assurance",""],["T0005","QMS","Quality Management System","ระบบบริหารคุณภาพ","ระบบเอกสารและกระบวนการที่องค์กรใช้บริหารคุณภาพ เช่น ISO 9001","Quality assurance",""],["T0006","SOP","Standard Operating Procedure","ขั้นตอนการปฏิบัติงานมาตรฐาน","เอกสารกำหนดวิธีปฏิบัติงานอย่างเป็นขั้นตอนเพื่อให้ผลลัพธ์สม่ำเสมอ","Quality assurance",""],["T0007","WI","Work Instruction","วิธีการปฏิบัติงาน","เอกสารอธิบายขั้นตอนทำงานแบบละเอียดสำหรับงานหนึ่ง ๆ หน้างาน","Quality assurance",""],["T0008","OEE","Overall Equipment Effectiveness","ประสิทธิผลโดยรวมของเครื่องจักร","ตัวชี้วัดคำนวณจาก Availability × Performance × Quality","Production",""],["T0009","WIP","Work in Process","งานระหว่างผลิต","สินค้าที่อยู่ระหว่างกระบวนการผลิต ยังไม่เป็นสินค้าสำเร็จรูป","Production",""],["T0010","MP","Mass Production","การผลิตจำนวนมาก","ขั้นตอนผลิตสินค้าตามปริมาณจริงหลังผ่านการพัฒนาและอนุมัติแล้ว","Production",""],["T0011","PP","Pre-Production","การผลิตก่อนเริ่มผลิตจริง","การผลิตทดลองจำนวนน้อยเพื่อยืนยันกระบวนการก่อนเข้า MP","Engineering",""],["T0012","ECR","Engineering Change Request","ใบขอเปลี่ยนแปลงทางวิศวกรรม","เอกสารขอเสนอให้เปลี่ยนแบบหรือข้อกำหนด เพื่อพิจารณาอนุมัติ","Engineering",""],["T0013","DWG","Drawing","แบบ/ภาพเขียนแบบ","เอกสารแสดงรูปร่าง ขนาด และพิกัดความเผื่อของชิ้นงาน","Engineering",""],["T0014","CAD","Computer-Aided Design","การออกแบบด้วยคอมพิวเตอร์","ซอฟต์แวร์ช่วยออกแบบและเขียนแบบ 2D/3D เช่น AutoCAD, SolidWorks","Engineering",""],["T0015","PLC","Programmable Logic Controller","ตัวควบคุมเชิงตรรกะที่โปรแกรมได้","อุปกรณ์ควบคุมอัตโนมัติสำหรับเครื่องจักรและกระบวนการในโรงงาน","Engineering",""],["T0016","NPI","New Product Introduction","การนำผลิตภัณฑ์ใหม่เข้าสู่การผลิต","กระบวนการพัฒนาผลิตภัณฑ์ใหม่ตั้งแต่แนวคิดจนถึงการผลิตจริง","Engineering",""],["T0017","MPJ","Master Project","โครงการหลัก","แผนหรือโครงการหลักที่ใช้ติดตามความคืบหน้าของการพัฒนารุ่นใหม่","Engineering",""],["T0018","PFMEA","Process Failure Mode and Effects Analysis","การวิเคราะห์ข้อบกพร่องและผลกระทบของกระบวนการ","เครื่องมือประเมินความเสี่ยงที่อาจเกิดในกระบวนการผลิตและวางมาตรการป้องกัน","Quality assurance",""],["T0019","IQC","Incoming Quality Control","การควบคุมคุณภาพวัตถุดิบขาเข้า","การตรวจสอบวัตถุดิบหรือชิ้นส่วนที่รับจากผู้ขายก่อนนำเข้าคลัง","Quality assurance",""],["T0020","OQC","Outgoing Quality Control","การควบคุมคุณภาพก่อนส่งมอบ","การตรวจสอบสินค้าสำเร็จรูปครั้งสุดท้ายก่อนส่งให้ลูกค้า","Quality assurance",""],["T0021","SAT","Site Acceptance Test","การทดสอบยอมรับหน้างาน","การทดสอบหลังติดตั้งที่หน้างานของลูกค้า เพื่อยืนยันว่าใช้งานได้ตามกำหนด","Engineering",""],["T0022","CTQ","Critical to Quality","ลักษณะสำคัญต่อคุณภาพ","คุณลักษณะที่ส่งผลโดยตรงต่อความพึงพอใจหรือการใช้งานของลูกค้า","Quality assurance",""],["T0023","CPK","Process Capability Index","ดัชนีความสามารถของกระบวนการ","ค่าทางสถิติบอกว่ากระบวนการผลิตอยู่ในพิกัดความเผื่อได้ดีเพียงใด","Quality assurance",""],["T0024","PPM","Parts Per Million","ชิ้นส่วนต่อล้านชิ้น","หน่วยวัดอัตราของเสีย เช่น 500 PPM คือเสีย 500 ชิ้นจากล้านชิ้น","Quality assurance",""],["T0025","ETA","Estimated Time of Arrival","เวลาที่คาดว่าจะถึง","วันและเวลาที่คาดว่าสินค้าจะมาถึงปลายทาง","Production control",""],["T0026","ETD","Estimated Time of Departure","เวลาที่คาดว่าจะออกเดินทาง","วันและเวลาที่คาดว่าสินค้าจะออกจากต้นทาง","Production control",""],["T0027","TPM","Total Productive Maintenance","การบำรุงรักษาทวีผลทุกคน","แนวทางที่ให้ทุกคนมีส่วนร่วมดูแลเครื่องจักรเพื่อลดการหยุดเสีย","Engineering",""],["T0028","PM","Preventive Maintenance","การบำรุงรักษาเชิงป้องกัน","การตรวจและซ่อมบำรุงตามแผนล่วงหน้าเพื่อป้องกันเครื่องเสีย","Engineering",""],["T0029","MTBF","Mean Time Between Failures","เวลาเฉลี่ยระหว่างการขัดข้อง","ค่าเฉลี่ยของเวลาที่เครื่องจักรทำงานได้ระหว่างการเสียแต่ละครั้ง","Engineering",""],["T0030","PPE","Personal Protective Equipment","อุปกรณ์ป้องกันอันตรายส่วนบุคคล","อุปกรณ์ที่ผู้ปฏิบัติงานสวมใส่ เช่น หมวกนิรภัย แว่นตา ถุงมือ","Safty and health",""],["T0031","MSDS","Material Safety Data Sheet","เอกสารข้อมูลความปลอดภัยสารเคมี","เอกสารระบุอันตราย การจัดเก็บ และการจัดการสารเคมี (ปัจจุบันใช้ชื่อ SDS)","Safty and health",""],["T0032","JIT","Just In Time","การผลิตแบบทันเวลาพอดี","แนวคิดผลิตหรือสั่งของเมื่อจำเป็นเท่านั้น เพื่อลดสต็อก","Production control",""],["T0033","MOQ","Minimum Order Quantity","ปริมาณสั่งซื้อขั้นต่ำ","จำนวนต่ำสุดที่ผู้ขายยอมรับต่อการสั่งซื้อหนึ่งครั้ง","Procument",""],["T0034","LT","Lead Time","ระยะเวลานำ","ระยะเวลาตั้งแต่สั่งซื้อหรือเริ่มงานจนได้รับสินค้าหรือผลงาน","Production control",""],["T0035","NCR","Non-Conformance Report","รายงานความไม่สอดคล้อง","รายงานบันทึกผลิตภัณฑ์หรือกระบวนการที่ไม่เป็นไปตามข้อกำหนด","Quality assurance",""],["T0036","KPI","Key Performance Indicator","ตัวชี้วัดผลการดำเนินงาน","ค่าที่ใช้วัดว่างานหรือองค์กรบรรลุเป้าหมายมากน้อยเพียงใด","Engineering",""],["T0037","IPQC","In-Process Quality Control","การควบคุมคุณภาพระหว่างกระบวนการ","การตรวจสอบคุณภาพระหว่างการผลิตเพื่อพบปัญหาแต่เนิ่น ๆ","Quality assurance",""],["T0038","FAI","First Article Inspection","การตรวจสอบชิ้นงานชิ้นแรก","การตรวจชิ้นงานแรกอย่างละเอียดว่าตรงตามแบบและข้อกำหนดหรือไม่","Quality assurance",""],["T0039","BOM","Bill of Materials","รายการวัสดุ/ชิ้นส่วน","รายการวัตถุดิบและชิ้นส่วนทั้งหมดพร้อมจำนวนที่ใช้ผลิตสินค้าหนึ่งหน่วย","Production",""],["T0040","BOQ","Bill of Quantities","ใบแสดงปริมาณงานและราคา","รายการปริมาณวัสดุและงานในโครงการ ใช้ประมาณราคาและประมูลงาน","Engineering",""],["T0041","ECN","Engineering Change Notice","ใบแจ้งการเปลี่ยนแปลงทางวิศวกรรม","เอกสารแจ้งการเปลี่ยนแปลงที่ได้รับอนุมัติแล้วต่อแบบหรือข้อกำหนด","Engineering",""],["T0042","CAM","Computer-Aided Manufacturing","การผลิตด้วยคอมพิวเตอร์ช่วย","ซอฟต์แวร์สร้างโปรแกรมควบคุมเครื่องจักร เช่น CNC จากแบบ CAD","Production",""],["T0043","HVAC","Heating, Ventilation and Air Conditioning","ระบบทำความร้อน ระบายอากาศ และปรับอากาศ","ระบบควบคุมอุณหภูมิ ความชื้น และคุณภาพอากาศในอาคารหรือโรงงาน","Engineering",""],["T0044","DFMEA","Design Failure Mode and Effects Analysis","การวิเคราะห์ข้อบกพร่องและผลกระทบของการออกแบบ","เครื่องมือประเมินความเสี่ยงของการออกแบบผลิตภัณฑ์ก่อนผลิตจริง","Engineering",""],["T0045","CAPA","Corrective and Preventive Action","การแก้ไขและการป้องกัน","การแก้ไขสาเหตุของปัญหาที่เกิดขึ้นและป้องกันไม่ให้เกิดซ้ำ","Quality assurance",""],["T0046","FAT","Factory Acceptance Test","การทดสอบยอมรับที่โรงงาน","การทดสอบเครื่องจักรหรือระบบที่โรงงานผู้ผลิตก่อนส่งมอบให้ลูกค้า","Engineering",""],["T0047","HAC","Home air conditioners","เครื่องปรับอากาศภายในบ้าน","เครื่องปรับอากาศที่ใช้คอยล์ร้อน 1 ตัว เชื่อมต่อและจ่ายความเย็นไปยังคอยล์เย็นได้หลายห้องพร้อมกัน","Engineering",""],["T0048","RFQ","Request for Quotation","ใบขอใบเสนอราคา","เอกสารที่ส่งถึงผู้ขายหลายราย เพื่อขอราคาและเงื่อนไขก่อนตัดสินใจซื้อ","Procument",""],["T0049","DR","Design Review","การทบทวนแบบ","การประชุมตรวจสอบแบบในแต่ละขั้นเพื่อหาปัญหาก่อนส่งต่อ","Engineering",""],["T0050","RAC","Room air conditioners","เครื่องปรับอากาศติดห้อง","เครื่องปรับอากาศขนาดเล็กถึงกลางที่ออกแบบมาเพื่อทำความเย็นในพื้นที่เฉพาะห้อง","Engineering",""]].map(r=>({id:r[0],abbr:r[1],full:r[2],thai:r[3],desc:r[4],cat:r[5],ex:r[6],updatedAt:"",updatedBy:""}));
+const TKEY="mcpDict.theme",LKEY="mcpDict.lang",HKEY="mcpDict.history",USERKEY="mcpDict.user";
+const L={en:{searchPh:"Ask MCP Dictionary",count:n=>n+" terms in total",all:"All",clear:"Clear",tipAdd:"Add new term",tipBrowse:"Browse all terms",tipHist:"Search history",tipTrash:"Trash",tipBackup:"Export / Import",tipLang:"Language",tipDark:"Dark mode",tipLight:"Light mode",found:n=>n+" results",browseAll:"All terms (A–Z)",noMatch:q=>"No terms match \u201c"+q+"\u201d",addThis:"+ Add this term",copy:"Copy",edit:"Edit",del:"Delete",close:"Close",cancel:"Cancel",save:"Save",addTitle:"Add new term",editTitle:"Edit term",lAbbr:"Abbreviation",lFull:"Full name",lThai:"Thai meaning",lDesc:"Description",lCat:"Category",lEx:"Example",added:"Term added",edited:"Term updated",dup:a=>"\u201c"+a+"\u201d already exists",copied:"Copied",copyFail:"Couldn\u2019t copy",trashed:"Moved to trash",confirmTrash:a=>"Move \u201c"+a+"\u201d to trash?",confirmRestore:a=>"Restore \u201c"+a+"\u201d?",confirmForever:a=>"Permanently delete \u201c"+a+"\u201d?",restored:"Term restored",toDark:"Dark mode",toLight:"Light mode",histTitle:"Search history",histEmpty:"No searches yet",clearAll:"Clear all",remove:"Remove",trashTitle:"Trash",trashNote:"Deleted terms are kept here.",trashEmpty:"Trash is empty",restore:"Restore",delForever:"Delete forever",emptyTrash:"Delete all",confirmEmpty:n=>"Permanently delete "+n+" terms?",bkTitle:"Export / Import",exportH:"Export",importH:"Import",drop:"Drop Excel here or click",xlsxFail:"Need internet for Excel",exported:"Exported",lUpdated:"Last updated",eReq:"Required",eCat:"Choose a category",syncOn:"Live sync",syncOff:"Offline"},th:{searchPh:"ถาม MCP Dictionary",count:n=>"มีคำศัพท์ทั้งหมด "+n+" คำ",all:"ทั้งหมด",clear:"ล้าง",tipAdd:"เพิ่มคำศัพท์ใหม่",tipBrowse:"ดูคำศัพท์ทั้งหมด",tipHist:"ประวัติการค้นหา",tipTrash:"ถังขยะ",tipBackup:"ส่งออก / นำเข้า",tipLang:"ภาษา",tipDark:"โหมดมืด",tipLight:"โหมดสว่าง",found:n=>"พบ "+n+" รายการ",browseAll:"คำศัพท์ทั้งหมด",noMatch:q=>"ไม่พบคำศัพท์ที่ตรงกับ \u201c"+q+"\u201d",addThis:"+ เพิ่มคำศัพท์นี้",copy:"คัดลอก",edit:"แก้ไข",del:"ลบ",close:"ปิด",cancel:"ยกเลิก",save:"บันทึก",addTitle:"เพิ่มคำศัพท์ใหม่",editTitle:"แก้ไขคำศัพท์",lAbbr:"คำย่อ",lFull:"ชื่อเต็ม",lThai:"ความหมายภาษาไทย",lDesc:"คำอธิบายเพิ่มเติม",lCat:"หมวดหมู่",lEx:"ตัวอย่างการใช้งาน",added:"เพิ่มคำศัพท์เรียบร้อย",edited:"แก้ไขคำศัพท์เรียบร้อย",dup:a=>"มีคำย่อ \u201c"+a+"\u201d ในระบบแล้ว",copied:"คัดลอกแล้ว",copyFail:"คัดลอกไม่ได้",trashed:"ย้ายไปถังขยะแล้ว",confirmTrash:a=>"ย้าย \u201c"+a+"\u201d ไปถังขยะใช่ไหม?",confirmRestore:a=>"กู้คืน \u201c"+a+"\u201d ใช่ไหม?",confirmForever:a=>"ลบ \u201c"+a+"\u201d ถาวรใช่ไหม?",restored:"กู้คืนคำศัพท์แล้ว",toDark:"โหมดมืด",toLight:"โหมดสว่าง",histTitle:"ประวัติการค้นหา",histEmpty:"ยังไม่มีประวัติ",clearAll:"ล้างทั้งหมด",remove:"ลบรายการ",trashTitle:"ถังขยะ",trashNote:"คำศัพท์ที่ลบจะถูกเก็บไว้ที่นี่",trashEmpty:"ถังขยะว่างเปล่า",restore:"กู้คืน",delForever:"ลบถาวร",emptyTrash:"ลบทั้งหมด",confirmEmpty:n=>"ลบถาวร "+n+" คำ ใช่หรือไม่?",bkTitle:"ส่งออก / นำเข้า",exportH:"ส่งออก",importH:"นำเข้า",drop:"วางไฟล์ Excel ที่นี่ หรือคลิก",xlsxFail:"ต้องมีอินเทอร์เน็ต",exported:"ส่งออกเรียบร้อย",lUpdated:"แก้ไขล่าสุด",eReq:"จำเป็นต้องกรอก",eCat:"เลือกหมวดหมู่",syncOn:"ซิงค์แบบเรียลไทม์",syncOff:"ออฟไลน์"}};
+let lang="en",terms=[],trash=[],hist=[],cat="All",browse=false,editId=null,viewId=null,ready=false;
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const norm=s=>String(s||"").toLowerCase().trim();
+const t=(k,...a)=>{const v=L[lang][k]??L.en[k]??k;return typeof v==="function"?v(...a):v};
+const open=id=>$(id).classList.add("show"),shut=id=>$(id).classList.remove("show");
+const read=(k,d)=>{try{const v=JSON.parse(localStorage.getItem(k));return v??d}catch(e){return d}};
+const store=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+function setTheme(th,silent){document.documentElement.dataset.theme=th;try{localStorage.setItem(TKEY,th)}catch(e){}if(!silent)toast(t(th==="dark"?"toDark":"toLight"));refreshStatic()}
+function setLang(l){lang=l==="th"?"th":"en";try{localStorage.setItem(LKEY,lang)}catch(e){}document.documentElement.lang=lang;refreshStatic();if($("ovForm").classList.contains("show"))fillCatSelect($("fCat").value);render();if($("ovView").classList.contains("show"))view(viewId);if($("ovHist").classList.contains("show"))renderHist();if($("ovTrash").classList.contains("show"))renderTrash();$("fTitle").textContent=t(editId?"editTitle":"addTitle");updateSyncUI()}
+function refreshStatic(){document.querySelectorAll("[data-i]").forEach(e=>e.textContent=t(e.dataset.i)+(e.dataset.req?" *":""));document.querySelectorAll("[data-ph]").forEach(e=>e.placeholder=t(e.dataset.ph));document.querySelectorAll("[data-ti]").forEach(e=>{const s=t(e.dataset.ti);e.dataset.tip=s;e.setAttribute("aria-label",s)});const dark=document.documentElement.dataset.theme==="dark",b=$("bTheme"),s=t(dark?"tipLight":"tipDark");b.dataset.tip=s;b.setAttribute("aria-label",s);document.querySelectorAll(".lang span").forEach(e=>e.classList.toggle("on",e.dataset.l===lang));$("fTitle").textContent=t(editId?"editTitle":"addTitle")}
+function updateSyncUI(){const el=$("syncStatus"),tx=$("syncText");if(ready){el.classList.remove("off");tx.textContent=t("syncOn")}else{el.classList.add("off");tx.textContent=t("syncOff")}}
+function rowToTerm(r){return{id:r.id,abbr:r.abbr,full:r.full,thai:r.thai,desc:r.description||"",cat:r.cat,ex:r.ex||"",updatedAt:r.updated_at||"",updatedBy:r.updated_by||""}}
+function termToRow(x){return{id:x.id,abbr:x.abbr,full:x.full,thai:x.thai,description:x.desc||"",cat:x.cat,ex:x.ex||"",updated_at:x.updatedAt||new Date().toISOString(),updated_by:x.updatedBy||""}}
+function trashToRow(x){return{...termToRow(x),deleted_at:x.deletedAt?new Date(x.deletedAt).toISOString():new Date().toISOString()}}
+const fmtId=n=>"T"+String(n).padStart(4,"0");
+const maxIdNum=a=>a.reduce((m,x)=>{const k=/^T(\d+)$/.exec(x.id||"");return k?Math.max(m,+k[1]):m},0);
+const nextIdNum=()=>Math.max(maxIdNum(terms),maxIdNum(trash),50)+1;
+const editor=()=>String(read(USERKEY,"")||"").trim();
+const stampNow=()=>({updatedAt:new Date().toISOString(),updatedBy:editor()});
+function fmtDate(v){if(!v)return"";const d=new Date(v);if(isNaN(d))return String(v);const p=n=>String(n).padStart(2,"0");return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())+" "+p(d.getHours())+":"+p(d.getMinutes())}
+function toast(m,err){const el=$("toast");el.textContent=m;el.className="show"+(err?" err":"");clearTimeout(toast.h);toast.h=setTimeout(()=>el.className="",2400)}
+function addHist(q){q=String(q||"").trim();if(q.length<2)return;hist=[q,...hist.filter(h=>norm(h)!==norm(q))].slice(0,20);store(HKEY,hist)}
+async function loadAll(){try{const[tr,th]=await Promise.all([sb.from("terms").select("*").order("id"),sb.from("trash").select("*").order("deleted_at",{ascending:false})]);if(tr.error)throw tr.error;if(th.error)throw th.error;terms=(tr.data||[]).map(rowToTerm);trash=(th.data||[]).map(r=>({...rowToTerm(r),deletedAt:r.deleted_at?+new Date(r.deleted_at):Date.now()}));if(terms.length===0){const rows=SEED.map(x=>termToRow({...x,...stampNow()}));const{error}=await sb.from("terms").insert(rows);if(!error)terms=SEED.map(x=>({...x,...stampNow()}))}ready=true;updateSyncUI();render();updateBadge()}catch(e){console.error(e);ready=false;updateSyncUI();toast("เชื่อมต่อ Supabase ไม่ได้",1)}}
+function subscribe(){sb.channel("mcp-live").on("postgres_changes",{event:"*",schema:"public",table:"terms"},async()=>{const{data}=await sb.from("terms").select("*").order("id");if(data){terms=data.map(rowToTerm);render()}}).on("postgres_changes",{event:"*",schema:"public",table:"trash"},async()=>{const{data}=await sb.from("trash").select("*").order("deleted_at",{ascending:false});if(data){trash=data.map(r=>({...rowToTerm(r),deletedAt:r.deleted_at?+new Date(r.deleted_at):Date.now()}));updateBadge();if($("ovTrash").classList.contains("show"))renderTrash()}}).subscribe(s=>{if(s==="SUBSCRIBED"){ready=true;updateSyncUI()}else if(s==="CHANNEL_ERROR"||s==="TIMED_OUT"){ready=false;updateSyncUI()}})}
+function score(x,q){const a=norm(x.abbr),f=norm(x.full),th=norm(x.thai),d=norm(x.desc+" "+x.ex+" "+x.cat);if(a===q)return 100;if(a.startsWith(q))return 90;if(f.startsWith(q))return 80;if(a.includes(q))return 70;if(f.includes(q))return 60;if(th.includes(q))return 50;if(d.includes(q))return 30;return 0}
+function hl(text,q){const s=esc(text);if(!q)return s;const i=norm(text).indexOf(q);if(i<0)return s;return esc(text.slice(0,i))+"<mark>"+esc(text.slice(i,i+q.length))+"</mark>"+esc(text.slice(i+q.length))}
+const IC={copy:'<svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8"/></svg>',edit:'<svg viewBox="0 0 24 24"><path d="M4 20h4L19 9a2.1 2.1 0 0 0-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg>',del:'<svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-12M9 7V4h6v3"/></svg>',x:'<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg>'};
+function render(){const q=norm($("q").value),show=!!q||browse;if(!show)cat="All";$("bClr").hidden=!q;$("bBrowse").classList.toggle("on",browse&&!q);["cats","meta","list"].forEach(id=>$(id).hidden=!show);$("count").textContent=t("count",terms.length);$("hero").classList.toggle("compact",show);const used=[...new Set(terms.map(x=>x.cat))];$("cats").innerHTML=["All",...CATS.filter(c=>used.includes(c))].map(c=>'<button class="chip'+(c===cat?" on":"")+'" data-cat="'+esc(c)+'">'+esc(c==="All"?t("all"):c)+"</button>").join("");const res=terms.filter(x=>cat==="All"||x.cat===cat).map(x=>({x,s:q?score(x,q):1})).filter(r=>r.s>0);res.sort((a,b)=>b.s-a.s||a.x.abbr.localeCompare(b.x.abbr));$("meta").textContent=q||cat!=="All"?t("found",res.length):t("browseAll");$("list").innerHTML=res.length?res.map(({x})=>'<div class="item" data-id="'+x.id+'" tabindex="0"><div class="abbr">'+hl(x.abbr,q)+'</div><div><div class="full">'+hl(x.full,q)+'</div><div class="th">'+hl(x.thai,q)+'</div><div class="desc">'+esc(x.desc)+'</div><span class="tag">'+esc(x.cat)+'</span></div><div class="ia"><button class="ib" data-a="copy" title="'+t("copy")+'">'+IC.copy+'</button><button class="ib" data-a="edit" title="'+t("edit")+'">'+IC.edit+'</button><button class="ib dng" data-a="del" title="'+t("del")+'">'+IC.del+"</button></div></div>").join(""):'<div class="empty"><p>'+esc(t("noMatch",$("q").value))+'</p><button class="btn pri" id="bAddEmpty">'+t("addThis")+"</button></div>"}
+function fillCatSelect(sel){const extra=sel&&!CATS.includes(sel)?[sel]:[];$("fCat").innerHTML=[...CATS,...extra].map(c=>'<option value="'+esc(c)+'">'+esc(c)+"</option>").join("");$("fCat").value=sel||CATS[0]}
+function openForm(id){editId=id||null;const x=terms.find(r=>r.id===id)||{};$("fTitle").textContent=t(id?"editTitle":"addTitle");fillCatSelect(x.cat);$("fAbbr").value=x.abbr||"";$("fFull").value=x.full||"";$("fTh").value=x.thai||"";$("fDesc").value=x.desc||"";$("fEx").value=x.ex||"";clearErrs();open("ovForm");$("fAbbr").focus()}
+function setErr(id,msg){const el=$(id);el.classList.toggle("invalid",!!msg);let e=el.nextElementSibling;if(!(e&&e.classList.contains("ferr"))){e=document.createElement("div");e.className="ferr";el.after(e)}e.textContent=msg||""}
+const clearErrs=()=>["fAbbr","fFull","fTh","fCat"].forEach(i=>setErr(i,""));
+async function saveForm(){const o={abbr:$("fAbbr").value.trim(),full:$("fFull").value.trim(),thai:$("fTh").value.trim(),desc:$("fDesc").value.trim(),cat:$("fCat").value,ex:$("fEx").value.trim()};clearErrs();let bad=null;if(!o.abbr){setErr("fAbbr",t("eReq"));bad="fAbbr"}else if(terms.some(x=>x.id!==editId&&norm(x.abbr)===norm(o.abbr))){setErr("fAbbr",t("dup",o.abbr));bad="fAbbr"}if(!o.full){setErr("fFull",t("eReq"));bad=bad||"fFull"}if(!o.thai){setErr("fTh",t("eReq"));bad=bad||"fTh"}if(!CATS.includes(o.cat)){setErr("fCat",t("eCat"));bad=bad||"fCat"}if(bad){$(bad).focus();return}Object.assign(o,stampNow());try{if(editId){const{error}=await sb.from("terms").update(termToRow({id:editId,...o})).eq("id",editId);if(error)throw error;const i=terms.findIndex(x=>x.id===editId);if(i>=0)terms[i]={id:editId,...o};toast(t("edited"))}else{const id=fmtId(nextIdNum());const{error}=await sb.from("terms").insert(termToRow({id,...o}));if(error)throw error;terms.push({id,...o});toast(t("added"))}shut("ovForm");editId=null;render()}catch(e){console.error(e);toast("บันทึกไม่สำเร็จ",1)}}
+function view(id){const x=terms.find(r=>r.id===id);if(!x)return;viewId=id;addHist($("q").value);$("vBody").innerHTML='<h2 class="vh">'+esc(x.abbr)+'</h2><dl class="dl"><div><dt>'+t("lFull")+'</dt><dd>'+esc(x.full)+'</dd></div><div><dt>'+t("lThai")+'</dt><dd>'+esc(x.thai)+'</dd></div><div><dt>'+t("lDesc")+'</dt><dd>'+esc(x.desc||"-")+'</dd></div><div><dt>'+t("lCat")+'</dt><dd><span class="tag" style="margin-top:0">'+esc(x.cat)+'</span></dd></div><div><dt>'+t("lEx")+'</dt><dd>'+esc(x.ex||"-")+'</dd></div><div><dt>'+t("lUpdated")+'</dt><dd>'+esc([fmtDate(x.updatedAt)||"-",x.updatedBy,x.id].filter(Boolean).join(" · "))+"</dd></div></dl>";open("ovView")}
+function copyText(s){const ok=()=>toast(t("copied"));const fb=()=>{const a=document.createElement("textarea");a.value=s;a.style.cssText="position:fixed;opacity:0";document.body.appendChild(a);a.select();try{document.execCommand("copy")?ok():toast(t("copyFail"),1)}catch(e){toast(t("copyFail"),1)}a.remove()};if(navigator.clipboard&&window.isSecureContext)navigator.clipboard.writeText(s).then(ok,fb);else fb()}
+function copyTerm(id){const x=terms.find(r=>r.id===id);if(!x)return;addHist($("q").value);copyText(x.abbr+" – "+x.full+(x.thai?" ("+x.thai+")":""))}
+async function trashTerm(id){const i=terms.findIndex(x=>x.id===id);if(i<0)return;const x=terms[i];try{const{error:e1}=await sb.from("terms").delete().eq("id",id);if(e1)throw e1;const{error:e2}=await sb.from("trash").upsert(trashToRow({...x,deletedAt:Date.now()}));if(e2)throw e2;terms.splice(i,1);trash.unshift({...x,deletedAt:Date.now()});render();updateBadge();toast(t("trashed"))}catch(e){console.error(e);toast("ลบไม่สำเร็จ",1)}}
+async function restoreTerm(id){const i=trash.findIndex(x=>x.id===id);if(i<0)return;const x=trash[i];if(terms.some(r=>norm(r.abbr)===norm(x.abbr)))return toast(t("dup",x.abbr),1);try{const{error:e1}=await sb.from("trash").delete().eq("id",id);if(e1)throw e1;const{deletedAt,...rest}=x;const row=termToRow({...rest,...stampNow()});const{error:e2}=await sb.from("terms").insert(row);if(e2)throw e2;trash.splice(i,1);terms.push({...rest,...stampNow()});render();updateBadge();if($("ovTrash").classList.contains("show"))renderTrash();toast(t("restored"))}catch(e){console.error(e);toast("กู้คืนไม่สำเร็จ",1)}}
+function updateBadge(){const b=$("trashBd");b.hidden=!trash.length;b.textContent=trash.length>99?"99+":trash.length}
+function renderHist(){$("histList").innerHTML=hist.length?hist.map((h,i)=>'<div class="lrow go" data-h="'+i+'"><div class="lt">'+esc(h)+'</div><div class="lr"><button class="ib" data-hx="'+i+'" title="'+t("remove")+'">'+IC.x+"</button></div></div>").join(""):'<div class="none">'+t("histEmpty")+"</div>";$("hClear").hidden=!hist.length}
+function renderTrash(){$("trashList").innerHTML=trash.length?trash.map(x=>'<div class="lrow"><div class="lt"><b>'+esc(x.abbr)+"</b><span>"+esc(x.full)+'</span></div><div class="lr"><button class="btn sm" data-r="'+x.id+'">'+t("restore")+'</button><button class="ib dng" data-p="'+x.id+'" title="'+t("delForever")+'">'+IC.del+"</button></div></div>").join(""):'<div class="none">'+t("trashEmpty")+"</div>";$("tEmpty").hidden=!trash.length}
+const HDR=["Abbreviation","Full Name","Thai Meaning","Description","Category","Example"];
+const rowsOut=()=>[...terms].sort((a,b)=>(parseInt(a.id.slice(1))||0)-(parseInt(b.id.slice(1))||0)).map(x=>[x.abbr,x.full,x.thai,x.desc,x.cat,x.ex||""]);
+let xlP=null;
+function loadXLSX(){if(window.XLSX)return Promise.resolve(window.XLSX);return xlP||(xlP=new Promise((res,rej)=>{const s=document.createElement("script");s.src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";s.onload=()=>window.XLSX?res(window.XLSX):(xlP=null,rej());s.onerror=()=>{xlP=null;rej()};document.head.appendChild(s)}))}
+async function exportXLSX(){try{const X=await loadXLSX();const rows=rowsOut(),wb=X.utils.book_new();const ws=X.utils.aoa_to_sheet([HDR,...rows]);X.utils.book_append_sheet(wb,ws,"Terms");X.writeFile(wb,"mcp-dictionary-"+new Date().toISOString().slice(0,10)+".xlsx");toast(t("exported"))}catch(e){toast(t("xlsxFail"),1)}}
+async function importFile(file){if(!/\.(xlsx|xlsm|xls)$/i.test(file.name)){toast("ไฟล์ไม่รองรับ",1);return}try{const X=await loadXLSX();const wb=X.read(await file.arrayBuffer(),{type:"array"});const sn=wb.SheetNames[0];const m=X.utils.sheet_to_json(wb.Sheets[sn],{header:1,defval:"",raw:false});if(m.length<2){toast("ไม่มีข้อมูล",1);return}let added=0,updated=0;for(let i=1;i<m.length;i++){const r=m[i];const abbr=String(r[0]||"").trim();if(!abbr)continue;const full=String(r[1]||"").trim(),thai=String(r[2]||"").trim(),desc=String(r[3]||"").trim(),cat=String(r[4]||"Other").trim(),ex=String(r[5]||"").trim();const c=CATS.find(x=>norm(x)===norm(cat))||"Other";const existing=terms.find(t=>norm(t.abbr)===norm(abbr));const st=stampNow();if(existing){Object.assign(existing,{full,thai,desc,cat:c,ex,...st});await sb.from("terms").update(termToRow(existing)).eq("id",existing.id);updated++}else{const id=fmtId(nextIdNum());const o={id,abbr,full,thai,desc,cat:c,ex,...st};await sb.from("terms").insert(termToRow(o));terms.push(o);added++}}render();toast("นำเข้า: เพิ่ม "+added+" · แก้ไข "+updated)}catch(e){console.error(e);toast("นำเข้าไม่สำเร็จ",1)}}
+function home(){$("q").value="";cat="All";browse=false;render();scrollTo({top:0,behavior:"smooth"})}
+function toggleBrowse(){browse=!browse;if(browse){$("q").value="";cat="All"}render()}
+$("q").addEventListener("input",()=>{if($("q").value)browse=false;render()});
+$("q").addEventListener("keydown",e=>{if(e.key==="Escape")home();if(e.key==="Enter")addHist($("q").value)});
+$("bClr").onclick=()=>{$("q").value="";render();$("q").focus()};
+$("logo").onclick=home;$("bAdd").onclick=()=>openForm();$("bBrowse").onclick=toggleBrowse;
+$("bHist").onclick=()=>{renderHist();open("ovHist")};$("bTrash").onclick=()=>{renderTrash();open("ovTrash")};$("bBackup").onclick=()=>open("ovBackup");
+$("bLang").onclick=()=>setLang(lang==="en"?"th":"en");
+$("bTheme").onclick=()=>setTheme(document.documentElement.dataset.theme==="dark"?"light":"dark");
+$("fSave").onclick=saveForm;$("fCancel").onclick=()=>shut("ovForm");
+$("vClose").onclick=()=>shut("ovView");$("vCopy").onclick=()=>copyTerm(viewId);
+$("hClose").onclick=()=>shut("ovHist");$("tClose").onclick=()=>shut("ovTrash");$("bkClose").onclick=()=>shut("ovBackup");
+$("hClear").onclick=()=>{hist=[];store(HKEY,hist);renderHist()};
+$("tEmpty").onclick=async()=>{if(!trash.length||!confirm(t("confirmEmpty",trash.length)))return;try{await sb.from("trash").delete().neq("id","");trash=[];renderTrash();updateBadge()}catch(e){toast("ลบไม่สำเร็จ",1)}};
+$("histList").onclick=e=>{const x=e.target.closest("[data-hx]");if(x){hist.splice(+x.dataset.hx,1);store(HKEY,hist);renderHist();return}const r=e.target.closest("[data-h]");if(r){browse=false;$("q").value=hist[+r.dataset.h];shut("ovHist");render();addHist($("q").value)}};
+$("trashList").onclick=e=>{const r=e.target.closest("[data-r]"),p=e.target.closest("[data-p]");if(r){const x=trash.find(y=>y.id===r.dataset.r);if(x&&confirm(t("confirmRestore",x.abbr)))restoreTerm(x.id)}if(p){const x=trash.find(y=>y.id===p.dataset.p);if(x&&confirm(t("confirmForever",x.abbr))){sb.from("trash").delete().eq("id",x.id).then(()=>{trash=trash.filter(y=>y.id!==x.id);renderTrash();updateBadge()})}}};
+$("exXlsx").onclick=exportXLSX;
+$("drop").onclick=()=>$("file").click();
+["dragenter","dragover"].forEach(ev=>$("drop").addEventListener(ev,e=>{e.preventDefault();$("drop").classList.add("over")}));
+["dragleave","drop"].forEach(ev=>$("drop").addEventListener(ev,e=>{e.preventDefault();$("drop").classList.remove("over")}));
+$("drop").addEventListener("drop",e=>{const f=e.dataTransfer.files[0];if(f)importFile(f)});
+$("file").onchange=e=>{const f=e.target.files[0];if(f)importFile(f);$("file").value=""};
+$("cats").onclick=e=>{const b=e.target.closest("[data-cat]");if(b){cat=b.dataset.cat;render()}};
+$("list").onclick=e=>{if(e.target.id==="bAddEmpty"){const v=$("q").value.trim();openForm();$("fAbbr").value=v;return}const it=e.target.closest(".item");if(!it)return;const b=e.target.closest("[data-a]"),id=it.dataset.id,a=b?b.dataset.a:"view";if(a==="view")view(id);else if(a==="copy")copyTerm(id);else if(a==="edit")openForm(id);else{const x=terms.find(r=>r.id===id);if(x&&confirm(t("confirmTrash",x.abbr)))trashTerm(id)}};
+document.querySelectorAll(".ov").forEach(o=>o.addEventListener("mousedown",e=>{if(e.target===o)o.classList.remove("show")}));
+document.addEventListener("keydown",e=>{if(e.key==="Escape")document.querySelectorAll(".ov.show").forEach(o=>o.classList.remove("show"));if(e.key==="/"&&!/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)&&!document.querySelector(".ov.show")){e.preventDefault();$("q").focus()}});
+["fAbbr","fFull","fTh","fEx"].forEach(id=>$(id).addEventListener("keydown",e=>{if(e.key==="Enter")saveForm()}));
+hist=read(HKEY,[]);
+setLang((()=>{try{return localStorage.getItem(LKEY)||"en"}catch(e){return"en"}})());
+loadAll().then(subscribe);
+</script>
 </body>
 </html>
