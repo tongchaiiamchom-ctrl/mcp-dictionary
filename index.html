@@ -441,31 +441,6 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape")document.querySelect
 ["fAbbr","fFull","fTh","fEx"].forEach(id=>$(id).addEventListener("keydown",e=>{if(e.key==="Enter")saveForm()}));
 hist=read(HKEY,[]);
 setLang((()=>{try{return localStorage.getItem(LKEY)||"en"}catch(e){return"en"}})());
-let pollBusy=false;
-async function refreshData(){
- if(pollBusy||document.hidden)return;
- pollBusy=true;
- try{
-  const[tr,th]=await Promise.all([
-   sb.from("terms").select("*").order("id"),
-   sb.from("trash").select("*").order("deleted_at",{ascending:false})
-  ]);
-  if(tr.error)throw tr.error;
-  if(th.error)throw th.error;
-  const nextTerms=(tr.data||[]).map(rowToTerm);
-  const nextTrash=(th.data||[]).map(r=>({...rowToTerm(r),deletedAt:r.deleted_at?+new Date(r.deleted_at):Date.now()}));
-  if(JSON.stringify(nextTerms)!==JSON.stringify(terms)){terms=nextTerms;render()}
-  if(JSON.stringify(nextTrash)!==JSON.stringify(trash)){
-   trash=nextTrash;updateBadge();
-   if($("ovTrash").classList.contains("show"))renderTrash();
-  }
-  ready=true;updateSyncUI();
- }catch(e){console.warn("Auto-sync failed",e);ready=false;updateSyncUI()}
- finally{pollBusy=false}
-}
-loadAll().then(()=>{
- setInterval(refreshData,3000);
- window.addEventListener("focus",refreshData);
-});</script>
+loadAll().then(()=>subscribe());</script>
 </body>
 </html>
